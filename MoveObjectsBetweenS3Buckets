@@ -1,0 +1,23 @@
+import boto3
+
+s3 = boto3.resource('s3')
+AWS_REGION = "INSERT REGION HERE"
+s3_resource = boto3.resource("s3", region_name=AWS_REGION)
+
+
+bucket = s3.Bucket('INSERT BUCKET1 HERE')
+dest_bucket = s3.Bucket('INSERT BUCKET2 HERE')
+prefix = 'INSERT STARTING LOCATION PREFIX HERE'
+route_key = 'INSERT STARTING LOCATION PREFIX HERE'
+
+objects = bucket.objects.filter(Prefix=f'{prefix}/INSERT OBJ PREFIX HERE')
+
+for obj in objects:
+    files = obj.key
+    copy_source = {
+            'Bucket': 'INSERT BUCKET1 HERE',
+            'Key': files
+            }
+    file = files.split("/")[-1]
+    dest_bucket.copy(copy_source, f"{route_key}/{file}")
+    print(file +'- File Moved')
