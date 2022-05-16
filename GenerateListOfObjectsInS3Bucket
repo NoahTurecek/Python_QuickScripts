@@ -1,0 +1,24 @@
+import boto3
+from pprint import pprint
+import re
+
+s3 = boto3.resource('s3')
+bucket = s3.Bucket('INSERT BUCKET HERE')
+
+AWS_REGION = "us-east-1"
+prefix = "INSERT OBJ PREFIX HERE"
+s3_resource = boto3.resource("s3", region_name=AWS_REGION)
+my_bucket = s3_resource.Bucket('INSERT BUCKET HERE')
+split_list = []
+final_list = []
+
+for my_bucket_object in my_bucket.objects.filter(Prefix='INSERT OBJ SOURCE PREFIX HERE'):
+    split_list.append(my_bucket_object)
+    
+new_list = [str(i).replace("s3.ObjectSummary(bucket_name='INSERT BUCKET HERE', key='INSERT OBJ DEST PREFIX HERE", '') for i in split_list]
+
+final_list = [i.replace("')", '') for i in new_list]
+final_list.remove(final_list[0])
+
+foo = [str(i) for i in final_list]
+pprint(foo)
