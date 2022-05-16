@@ -1,0 +1,25 @@
+import datetime
+import boto3
+
+s3 = boto3.resource('s3')
+bucket = s3.Bucket('INSERT BUCKET HERE')
+
+AWS_REGION = "INSERT REGION HERE"
+prefix = "INSERT SOURCE PREFIX HERE"
+dest_prefix = "INSERT DESTINATION PREFIX HERE"
+s3_resource = boto3.resource("s3", region_name=AWS_REGION)
+
+def rename_s3_object(bucket, old_key, new_key):
+    old_s3_object = s3_resource.Object(bucket, old_key)
+    new_s3_object = s3_resource.Object(bucket, new_key)
+
+    new_s3_object.copy_from(CopySource=f'{bucket}/{old_key}')
+    old_s3_object.delete()
+
+
+objects = bucket.objects.filter(Prefix=f'{prefix}/move')
+
+for obj in objects:
+    ext = obj.key.partition('.')[-1]  # Assume everything after the first . is the extension
+    new_name = f'{dest_prefix}/movetest.{ext}'
+    rename_s3_object(bucket.name, obj.key, new_name)
