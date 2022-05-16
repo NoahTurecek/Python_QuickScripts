@@ -1,0 +1,18 @@
+import smtplib
+
+sender = ['first.last@domain.com']
+receivers = ['first.last@domain.com']
+
+message = ("""From: Reporting <CREATE_SENDING_ADDRESS_HERE@domain.com>
+To: RECIPIENT <first.last@domain.com>
+Subject: INSERT SUBJECT HERE
+Here are the Weekly Reporting Numbers for DATA VENDOR: 
+
+""" + values)
+
+try:
+	smtpObj = smtplib.SMTP('localhost')
+	smtpObj.sendmail(sender, receivers, message)
+	print ("Successfully sent email")
+except SMTPException:
+	print ("Error: unable to send email")
