@@ -1,0 +1,34 @@
+import boto3
+from datetime import datetime,timedelta
+import pytz
+import sys
+
+Reporting_Results = context.getGridVariable('auto_counter')
+
+s3 = boto3.resource('s3')
+sns = boto3.client('sns')
+
+bucket = "INSERT ENTIRE URI HERE"
+check_fail = []
+
+def check_bucket(event, context):
+    time_now_UTC = datetime.utcnow().replace(tzinfo=pytz.UTC)
+    delta_hours = time_now_UTC - timedelta(hours=24)
+
+    for bucket_name in bucket:
+        bucket = s3.Bucket(bucket_name)
+        for key in bucket.objects.all():
+            if key.last_modified >= delta_hours:
+                print("There are new files in the bucket %s" %bucket)
+                break
+        else:
+            check_fail.append(bucket)
+
+    if len(check_fail) >= 1:    
+        sns.publish(
+        TopicArn='arn:aws:sns:us-east-1:xxxxxxxxxxxxxx:xxxxxx',
+        Message="The following bucket didn't receive new files for longer than 2 hours: %s" %check_fail,
+        Subject='AWS Notification Message' )
+    else: 
+       context.updateGridVariable('auto_counter',1)
+       print("The bucket has new files")
