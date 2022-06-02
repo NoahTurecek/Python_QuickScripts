@@ -1,0 +1,100 @@
+import smtplib
+import math
+
+#body1
+trc = context.getGridVariable('total_row_count')
+total_row_count = [trc]
+trc_final =' '.join([str(item) for item in total_row_count])
+
+#body2
+urc = context.getGridVariable('unique_row_count')
+unique_row_count = [urc]
+urc_final =' '.join([str(item) for item in unique_row_count])
+
+#body3
+umc = context.getGridVariable('unique_maid_count')
+unique_maid_count = [umc]
+umc_final =' '.join([str(item) for item in unique_maid_count])
+
+#body4
+uhc = context.getGridVariable('unique_hem_count')
+unique_hem_count = [uhc]
+uhc_final =' '.join([str(item) for item in unique_hem_count])
+
+#body5
+upc = context.getGridVariable('unique_pair_count')
+unique_pair_count = [upc]
+upc_final =' '.join([str(item) for item in unique_pair_count])
+
+#body6
+amph = context.getGridVariable('average_maids')
+avg_maids_per_hem = [amph]
+amph_final =' '.join([str(item) for item in avg_maids_per_hem])
+
+#body7
+ahpm = context.getGridVariable('average_hems')
+avg_hems_per_maid = [ahpm]
+ahpm_final =' '.join([str(item) for item in avg_hems_per_maid])
+
+#body8
+mwsh = context.getGridVariable('maids_w_six_hems')
+maids_w_six_hems = [mwsh]
+mwsh_final =' '.join([str(item) for item in maids_w_six_hems])
+
+#body9
+hwsm = context.getGridVariable('hems_w_six_maids')
+hems_w_six_maids = [hwsm]
+hwsm_final =' '.join([str(item) for item in hems_w_six_maids])
+
+#body10
+pz2f = context.getGridVariable('pairs_zero_to_fourteen')
+pairs_zero_to_fourteen = [pz2f]
+pz2f_final =' '.join([str(item) for item in pairs_zero_to_fourteen])
+
+#body11
+pf2t = context.getGridVariable('pairs_fifteen_to_thirty')
+pairs_fifteen_to_thirty = [pf2t]
+pf2t_final =' '.join([str(item) for item in pairs_fifteen_to_thirty])
+
+#body12
+pt2s = context.getGridVariable('pairs_thirtyone_to_sixty')
+pairs_thirtyone_to_sixty = [pt2s]
+pt2s_final =' '.join([str(item) for item in pairs_thirtyone_to_sixty])
+
+#body13
+pos = context.getGridVariable('pairs_over_sixty')
+pairs_over_sixty = [pos]
+pos_final =' '.join([str(item) for item in pairs_over_sixty])
+
+
+sender = ['noah.turecek@thebridgecorp.com']
+receivers = ['noah.turecek@thebridgecorp.com']
+
+body1 = "Total Row Count:{}".format(trc_final)
+body2 = "Unique Row Count:{}".format(urc_final)
+body3 = "Unique Maid Count:{}".format(umc_final) 
+body4 = "Unique Hem Count:{}".format(uhc_final)
+body5 = "Unique Pair Count:{}".format(upc_final)
+body6 = "Average Maids:{}".format(amph_final)
+body7 = "Average Hems:{}".format(ahpm_final)
+body8 = "Maids with six or more Hems:{}".format(mwsh_final) 
+body9 = "Hems with six or more Maids:{}".format(hwsm_final) 
+body10 = "Pairs - 0 to 14 Days:{}".format(pz2f_final) 
+body11 = "Pairs - 15 to 30 Days:{}".format(pf2t_final)  
+body12 = "Pairs - 31 to 60 Days:{}".format(pt2s_final)  
+body13 = "Pairs - Over 60 Days:{}".format(pos_final)
+
+message = ("""From: Automatic Reporting <Matillion_Bridge@thebridgecorp.com>
+To: Noah <noah.turecek@thebridgecorp.com>
+Subject: Vendor Maid Comparison Results
+Here are the automatically-generated results for the recent vendor maid comparison task:
+
+""" + str(body1) + """\n""" + str(body2) + """\n""" + str(body3) + """\n""" + str(body4) + """\n""" + str(body5) + """\n""" + str(body6) + """\n""" + body7 + """\n""" + body8 + """\n""" + body9+ """\n""" + body10 + """\n""" + body11 + """\n""" + body12 + """\n""" + body13)
+           
+
+try:
+	smtpObj = smtplib.SMTP('localhost')
+	smtpObj.sendmail(sender, receivers, message)
+	print ("Successfully sent email")
+except SMTPException:
+	print ("Error: unable to send email")
