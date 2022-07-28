@@ -1,0 +1,35 @@
+import glob
+import mmap
+import time
+import os
+
+
+def combine_files():
+    """
+    The combine_files function combines all the csv files in the _inbox directory into a single file called combined.csv
+    :return: A list of the names of all files in the inbox folder
+    :doc-author: Me
+    """
+    path = '../_inbox'
+    all_files = glob.glob(f"{path}/*.csv")
+    with open("../_outbox/combined.csv", "w+b") as write_f:
+        for i, fname in enumerate(all_files):
+            with open(fname, "r+b") as f:
+                with mmap.mmap(f.fileno(), 0) as mm:
+                    # Keep the first line of the file as the header
+                    if i == 0:
+                        write_f.write(mm.readline())
+                    else:
+                        mm.readline()
+                    write_f.write(mm.read())
+
+
+def main():
+    start = time.time()
+    combine_files()
+    end = time.time()
+    print(end - start)
+
+
+if __name__ == '__main__':
+    main()
