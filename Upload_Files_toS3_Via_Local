@@ -1,0 +1,55 @@
+import logging
+import os
+
+import boto3
+import botocore.exceptions
+from dotenv import load_dotenv
+from tqdm import tqdm
+
+load_dotenv()
+ENV = os.getenv
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+
+s3_one = boto3.resource(
+    service_name='s3',
+    aws_access_key_id=ENV('AWS_ACCESS_KEY_ID'),
+    aws_secret_access_key=ENV('AWS_SECRET_ACCESS_KEY'),
+    region_name=ENV('AWS_DEFAULT_REGION'),
+)
+
+
+def send_files_to_s3(bucket: str, key: str, directory: str) -> None:
+    """
+    The send_files_to_s3 function uploads files from a local directory to an S3 bucket.
+    :param bucket:str: Specify the bucket name
+    :param key:str: Specify the key for the s3 bucket
+    :param directory:str: Specify the directory where the files are located
+    :return: None
+    """
+    logging.info('Sending files to S3...')
+    try:
+        for file in os.listdir(f'{directory}/'):
+            file_size = os.stat(f"{directory}/{file}").st_size
+            with tqdm(total=file_size, unit="B", unit_scale=True, desc=file) as pbar:
+                s3_one.meta.client.upload_file(f'{directory}/{file}', bucket, f'{key}/{file}',
+                                               Callback=lambda bytes_transferred: pbar.update(bytes_transferred))
+        logging.info('Files sent to S3.')
+    except botocore.exceptions.ClientError as e:
+        if e.response['Error']['Code'] == '404':
+            logging.error('The object does not exist.')
+        else:
+            raise
+    except Exception as e:
+        logging.error(e)
+
+
+def main():
+    bucket = input('Enter bucket name: ')
+    s3_dir = input('Enter S3 location: ')
+    local_dir = "../_inbox/"
+    send_files_to_s3(bucket, s3_dir, local_dir)
+
+
+if __name__ == '__main__':
+    main()
