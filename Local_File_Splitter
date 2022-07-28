@@ -1,0 +1,58 @@
+import os
+
+from filesplit.split import Split
+
+import sys
+
+
+def split_file(txt_file_path, split_file_path, split_size: int, include_header=True) -> None:
+    """
+    The split_file function splits a text file into smaller files of equal size.
+    :param txt_file_path: Specify the path to the text file that will be split
+    :param split_file_path: Specify the path where the split files will be stored
+    :param split_size:int: Determine the size of each split file
+    :param include_header=True: Determine whether the first line of the input file should be written to all output files
+    :return: A list of files that were created from the original file
+    """
+    split_size *= 1048576
+    try:
+        split = Split(txt_file_path, split_file_path)
+        split.bysize(split_size, newline=True, includeheader=include_header)
+        # delete manifest file
+        os.remove(f"{split_file_path}/manifest")
+    except Exception as e:
+        print(e)
+
+
+def split_file_by_line(txt_file_path, split_file_path, linecount: int, include_header=True) -> None:
+    """
+    The split_file function splits a text file into smaller files of equal size.
+    :param txt_file_path: Specify the path to the text file that will be split
+    :param split_file_path: Specify the path where the split files will be stored
+    :param linecount:int: Determine the row size of each split file
+    :param include_header=True: Determine whether the first line of the input file should be written to all output files
+    :return: A list of files that were created from the original file
+    """
+    try:
+        split = Split(txt_file_path, split_file_path)
+        split.bylinecount(linecount, includeheader=include_header)
+        # delete manifest file
+        os.remove(f"{split_file_path}/manifest")
+    except Exception as e:
+        print(e)
+
+
+def main():
+    # """ Main function. """
+    sys.setrecursionlimit(2000)
+    include_header = True
+    txt_file_path = input("Enter the path to the file to split: ")
+    # split_size = int(input("Enter the size of the split files in MB: "))
+    line_count = int(input("Enter the number of lines per split file: "))
+    split_file_path = "../_outbox/"
+    # split_file(txt_file_path, split_file_path, split_size, include_header)
+    split_file_by_line(txt_file_path, split_file_path, line_count, include_header)
+
+
+if __name__ == '__main__':
+    main()
