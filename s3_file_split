@@ -1,0 +1,54 @@
+import io
+import logging
+import os
+from datetime import datetime
+
+import boto3
+import pandas as pd
+from dotenv import load_dotenv
+from tqdm import tqdm
+
+load_dotenv()
+ENV = os.getenv
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+
+s3_one = boto3.resource(
+    service_name='s3',
+    aws_access_key_id=ENV('AWS_ACCESS_KEY_ID'),
+    aws_secret_access_key=ENV('AWS_SECRET_ACCESS_KEY'),
+    region_name=ENV('AWS_DEFAULT_REGION'),
+)
+
+
+def s3_file_split(s3_uri_file: str, record_count: int, bucket: str, split_location: str) -> None:
+    """
+    The s3_file_split function splits a CSV file into smaller chunks on s3.
+    :param s3_uri_file:str: Specify the file that is to be split
+    :param record_count:int: Specify the number of records to be read from the file
+    :param bucket:str: Specify the bucket to write the file to
+    :param split_location:str: Specify the location where the split files will be saved
+    :return: None
+    """
+    df = pd.read_csv(s3_uri_file, chunksize=record_count)
+    for chunk_count, chunk in enumerate(tqdm(df), start=1):
+        csv_buffer = io.StringIO()
+        chunk.to_csv(csv_buffer, index=False)
+        s3_one.Object(bucket, f'{split_location}/chunk_{chunk_count}.csv').put(Body=csv_buffer.getvalue())
+        logging.info(f'Chunk {chunk_count} saved.')
+
+
+def main():
+    start_time = datetime.now()
+    s3_uri_file = input(
+        "Example ->(s3://bridge-datawarehouse-exports/data-team/daniel/file.csv)\nEnter the s3 uri file: ")
+    record_count = int(input('Enter the amount of records to split per file: '))
+    bucket = input("Example ->(bridge-datawarehouse-exports)\nEnter bucket name: ")
+    split_location = input("Example ->(data-team/daniel/chunk)\nEnter the location to save the splits files: ")
+    s3_file_split(s3_uri_file, record_count, bucket, split_location)
+    end_time = datetime.now()
+    logging.info(f'Total time: {end_time - start_time}')
+
+
+if __name__ == '__main__':
+    main()
